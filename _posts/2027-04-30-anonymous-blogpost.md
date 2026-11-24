@@ -18,6 +18,7 @@ toc:
   - name: "What Fundamental Properties Should a Confidence Score Have?"
   - name: "Schur-Convexity Gives Us These Properties"
     subsections:
+      - name: "Schur-Convexity, Formally"
       - name: "Wait, They Were Schur-Convex All Along?"
   - name: "We Still Need Empirical Comparison"
   - name: "Additional Thoughts"
@@ -49,6 +50,8 @@ C:\Delta^{K-1}\to\mathbb{R}, \quad \boldsymbol{\pi}\mapsto C(\boldsymbol{\pi}), 
 \tag{1}
 $$
 </div>
+
+<d-footnote>\(\Delta^{K-1}\) refers to a probability simplex over \(K\) discrete outcomes – or in other terms, a \(K-\)event discrete probability distribution/vector.</d-footnote>
 
 which is then used to perform selection based on whether it exceeds a threshold,
 
@@ -1022,11 +1025,140 @@ Doesn't it make sense that confidence should *decrease* after such a transfer? W
 </section>
 </div>
 
-Although the above property may not immediately come to mind for an AI researcher, intuitively, spreading out probability so it is more equal between outcomes intuitively ought to increase a model's uncertainty. The literature tends to *take the above properties for granted*, and so readers may not have thought much about them. Confidence scores are motivated through decision theory <d-cite key="Chow1970Optimum,Elyaniv2010Foundations,Granese2021Doctor"></d-cite>, intuition <d-cite key="Liu2023Gen,Xia2024Augmenting,Kang2025Scalable"></d-cite> and empirical performance <d-cite key="Hendrycks2017Baseline,Feng2023Towards"></d-cite> without explicitly discussing these properties. It may seem obvious that a confidence score *should* behave as the above, but the reader may be unsure of exactly *why* they do. We will now demonstrate how the last "Robin hood" property induces the other two, and how it organically appears throughout many of the softmax confidence scores in the deep learning uncertainty literature.
+Although the above property may not immediately come to mind for an AI researcher, intuitively, spreading out probability so it is more equal between outcomes intuitively ought to increase a model's uncertainty. The literature tends to *take the above properties for granted*, and so readers may not have thought much about them. Confidence scores are motivated through decision theory <d-cite key="Chow1970Optimum,Elyaniv2010Foundations,Granese2021Doctor"></d-cite>, intuition <d-cite key="Liu2023Gen,Xia2024Augmenting,Kang2025Scalable"></d-cite> and empirical performance <d-cite key="Hendrycks2017Baseline,Feng2023Towards"></d-cite> without explicitly discussing these properties. It may seem obvious that a confidence score *should* behave as the above, but the reader may be unsure of exactly *why* they do. We will now demonstrate how the last "Robin Hood" property induces the other two, and how it organically appears throughout many of the softmax confidence scores in the deep learning uncertainty literature.
 
 ## Schur-Convexity Gives Us These Properties
 
+If Property 3 holds for one Robin Hood transfer, then it also holds for a sequence of Robin Hood transfers, with $C$ decreasing at each step.
+
+<div class="equation-box">
+$$
+\text{For Robin Hood transfers }
+    \boldsymbol{\pi}^{(1)} \rightarrow \boldsymbol{\pi}^{(2)}
+\rightarrow \cdots \rightarrow \boldsymbol{\pi}^{(n)}, \quad
+C(\boldsymbol{\pi}^{(1)}) > C(\boldsymbol{\pi}^{(2)})
+> \cdots > C(\boldsymbol{\pi}^{(n)})
+\tag{3}
+$$
+</div>
+
+<div class="l-page">
+  <iframe
+    src="{{ 'assets/html/2027-04-30-anonymous-blogpost/robin-hood-sequence.html' | relative_url }}"
+    title="Robin Hood Sequence"
+    loading="lazy"
+    style="width: 100%; height: 600px; border: 0;"
+  ></iframe>
+</div>
+<div class="caption">Widget that visualises a sequence of Robin Hood transfers where confidence keeps decreasing.</div>
+
+The neat thing, is that given the above, the maximum and minimum end points drop out intuitively.
+
+<div class="l-page">
+  <iframe
+    src="{{ 'assets/html/2027-04-30-anonymous-blogpost/robin-hood-extrema.html' | relative_url }}"
+    title="Robin Hood Extrema"
+    loading="lazy"
+    style="width: 100%; height: 750px; border: 0;"
+  ></iframe>
+</div>
+<div class="caption">Widget bidirectionally visualises extrema.</div>
+
+Thus, Property 3 induces Properties 1 and 2.
+
+### Schur-Convexity, Formally
+
+The above behaviour, which we've tried to introduce intuitively, can be framed formally as Majorisation and Schur convexity <d-cite key="hardy1929simple,marshall2011inequalities"></d-cite>:
+
+<div class="takeaway-box" markdown="1">
+<div class="takeaway-title"><span>Majorisation</span> For vectors
+\(\boldsymbol{x},\boldsymbol{y}\in \mathbb{R}^K\), where
+\(\sum_k x_k=\sum_k y_k\), \(\boldsymbol{x}\) <strong>majorises</strong>
+\(\boldsymbol{y}\) if, after sorting each vector from largest to
+smallest:</div>
+
+<div class="equation-box">
+$$
+\sum_{i=1}^k x_i^\text{sorted} \geq \sum_{i=1}^k y_i^\text{sorted}\quad \text{for all } k=1,\dots,K,
+\tag{4}
+$$
+</div>
+
+*i.e.* adding one element at a time, the cumulative sum of sorted (highest to lowest) $\boldsymbol{x}$ stays greater than or equal to that of $\boldsymbol{y}$, all the way. This is denoted:
+
+<div class="equation-box">
+$$
+\boldsymbol{x} \succ \boldsymbol{y}
+\tag{5}
+$$
+</div>
+
+</div>
+
+Linking to our above illustrations about probabilities, note that:
+
+- Discrete probability vectors $\boldsymbol{\pi}$ all sum to 1, $\sum_k \pi_k=\sum_k \pi'_k=1$, so they all satisfy the first criterion for majorisation.
+
+- If $\boldsymbol{\pi}^{(1)} \rightarrow \boldsymbol{\pi}^{(2)}$ via a single Robin Hood transfer, then the sorted cumulative sum of $\boldsymbol{\pi}^{(1)}$ will exceed $\boldsymbol{\pi}^{(2)}$ starting at the donor's original rank in $\boldsymbol{\pi}^{(1)}$.<d-footnote>Or potentially after in the case of tied probabilities with the donor.</d-footnote> As probability mass was transferred to a lower-ranked outcome, the cumulative sum of $\boldsymbol{\pi}^{(2)}$ will never be able to exceed that of $\boldsymbol{\pi}^{(1)}$, only catch up to it, so $\boldsymbol{\pi}^{(1)}\succ\boldsymbol{\pi}^{(2)}$.
+
+- Consequently, if $\boldsymbol{\pi}^{(1)} \rightarrow,\dots,\rightarrow \boldsymbol{\pi}^{(n)}$ via a sequence of Robin Hood transfers, each distribution will majorise all subsequent distributions, $\boldsymbol{\pi}^{(i)}\succ\boldsymbol{\pi}^{(k)}$ for all $k>i$.
+
+- So if $\boldsymbol{\pi}^{(n)}$ can be produced from $\boldsymbol{\pi}^{(1)}$ through a sequence of Robin Hood transfers, $\boldsymbol{\pi}^{(1)}\succ\boldsymbol{\pi}^{(n)}$.
+
+- In fact, $\boldsymbol{x}\succ\boldsymbol{y}
+  \quad\Longleftrightarrow\quad
+  \boldsymbol{x}\xrightarrow{\text{Robin Hood transfers}}\boldsymbol{y}$. Going the other direction, you can show that if $\boldsymbol{x}\succ\boldsymbol{y}$ there always exists a sequence of Robin Hood transfers to get from $\boldsymbol{x}$ to $\boldsymbol{y}$.
+
+<div class="takeaway-box" markdown="1">
+<div class="takeaway-title"><span>Schur Convexity</span> A function
+\(f:\mathbb{R}^K\rightarrow\mathbb{R}\) is <strong>Schur convex</strong>
+if</div>
+
+<div class="equation-box">
+$$
+f(\boldsymbol{x}) \geq f(\boldsymbol{y}) \text{ when } \boldsymbol{x}\succ\boldsymbol{y}
+\tag{6}
+$$
+</div>
+
+and strictly Schur convex if
+
+<div class="equation-box">
+$$
+f(\boldsymbol{x}) > f(\boldsymbol{y}) \text{ when } \boldsymbol{x}\succ\boldsymbol{y}
+\tag{7}
+$$
+</div>
+
+</div>
+
+As a sequence of Robin Hood transfers from $\boldsymbol{x}$ to $\boldsymbol{y}$ implies $\boldsymbol{x}\succ\boldsymbol{y}$ and vice versa, the above (strict) definition is equivalent to our Property 3. In this blogpost, we chose to start with Robin Hood transfers conceptually as they more intuitively connect with confidence score behaviour compared to the formal definitions of majorisation and Schur convexity. In the remainder of the blog we will refer to Property 3 as Schur convexity; however, we want to emphasise the underlying *intuition* -- Robin Hood transfers that increase inequality also decrease confidence/increase uncertainty. In fact, the standard criterion for Schur convexity tests precisely this (infinitessimally):
+
+<div class="takeaway-box" markdown="1">
+<div class="takeaway-title"><span>Schur–Ostrowski Criterion</span></div>
+
+<div class="equation-box">
+$$
+(x_i-x_j)
+    \left(
+        \frac{\partial f(\boldsymbol{x})}{\partial x_i}
+        -
+        \frac{\partial f(\boldsymbol{x})}{\partial x_j}
+    \right)
+    \geq 0
+    \quad
+    \text{for all } i,j
+    \text{, and all } \boldsymbol{x}\in \mathbb{R}^K
+    \text{ where } \sum_{k} x_k=\text{constant}.
+\tag{8}
+$$
+</div>
+
+</div>
+
 ### Wait, They Were Schur-Convex All Along?
+
+Next, we'll discuss how many existing confidence scores used in the literature are in fact Schur convex, and so have the desirable properties discussed in this blogpost.
 
 ## We Still Need Empirical Comparison
 

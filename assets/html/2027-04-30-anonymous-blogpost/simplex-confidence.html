@@ -437,7 +437,7 @@
 <div class="widget" role="group" aria-label="Interactive three-class confidence simplex">
   <header class="heading">
     <h1>Power Score on the Simplex <span>\(K=3\)</span></h1>
-    <p class="heading-formula" aria-label="C alpha of pi equals K to the power 1 minus alpha minus the sum of pi i to the power alpha, divided by alpha times one minus alpha.">\(C_\alpha(\boldsymbol{\pi}) = \dfrac{K^{1-\alpha} - \sum_{i=1}^{K} \pi_i^\alpha}{\alpha(1-\alpha)}\)</p>
+    <p class="heading-formula" aria-label="C alpha of pi equals minus K to the power 1 minus alpha plus the sum of pi i to the power alpha, divided by alpha times alpha minus one.">\(C_\alpha(\boldsymbol{\pi}) = \dfrac{-K^{1-\alpha} + \sum_{i=1}^{K} \pi_i^\alpha}{\alpha(\alpha-1)}\)</p>
   </header>
   <nav class="tab-strip" role="tablist" aria-label="Simplex demonstration">
     <button class="view-tab" id="tab-explore" role="tab" data-view="explore" aria-controls="panel-explore" aria-selected="true" tabindex="0"><span class="tab-dot" aria-hidden="true"></span>Explore</button>
@@ -669,7 +669,7 @@
 (() => {
   'use strict';
 
-  // Displayed normalization: C_alpha(pi) = [3^(1-alpha) - sum(pi_i^alpha)] / [alpha(1-alpha)].
+  // Displayed normalization: C_alpha(pi) = [-3^(1-alpha) + sum(pi_i^alpha)] / [alpha(alpha-1)].
   // Continuous limits: C_1 = log(3) + sum(pi_i log pi_i) = KL(pi || uniform),
   //                    C_0 = -3*log(3) - sum(log pi_i) = 3*KL(uniform || pi).
   // At alpha = +/-Infinity we use rank-order surrogates max(pi) and -min(pi),
