@@ -71,7 +71,7 @@ $$
 The AI research literature tends to take certain properties of softmax-based confidence scores *for granted*, and so readers may not have thought much about them. The aim of this blogpost is to inform the reader about said *fundamental properties* in an intuitive, and enjoyable manner.<d-footnote>The ideas explored in this blogpost around Schur convexity are established in classical mathematics <d-cite key="hardy1929simple,marshall2011inequalities"></d-cite> and information theory <d-cite key="clausing1983type,cicalese2002supermodularity"></d-cite>. However, for the intended audience of AI researchers and practitioners, they are often overlooked.</d-footnote>
 
 <div class="takeaway-box" markdown="1">
-<div class="takeaway-title"><span>In this blogpost we:</span></div>
+<div class="takeaway-title">In this blogpost we:</div>
 
 - Discuss fundamental properties of confidence scores (that AI researchers often take for granted)
 
@@ -1071,11 +1071,9 @@ Thus, Property 3 induces Properties 1 and 2.
 The above behaviour, which we've tried to introduce intuitively, can be framed formally as Majorisation and Schur convexity <d-cite key="hardy1929simple,marshall2011inequalities"></d-cite>:
 
 <div class="takeaway-box" markdown="1">
-<div class="takeaway-title"><span>Majorisation</span> For vectors
-\(\boldsymbol{x},\boldsymbol{y}\in \mathbb{R}^K\), where
-\(\sum_k x_k=\sum_k y_k\), \(\boldsymbol{x}\) <strong>majorises</strong>
-\(\boldsymbol{y}\) if, after sorting each vector from largest to
-smallest:</div>
+<div class="takeaway-title">Majorisation</div>
+
+For vectors $\boldsymbol{x},\boldsymbol{y}\in \mathbb{R}^K$, where $\sum_k x_k=\sum_k y_k$, $\boldsymbol{x}$ **majorises** $\boldsymbol{y}$ if, after sorting each vector from largest to smallest:
 
 <div class="equation-box">
 $$
@@ -1110,9 +1108,9 @@ Linking to our above illustrations about probabilities, note that:
   \boldsymbol{x}\xrightarrow{\text{Robin Hood transfers}}\boldsymbol{y}$. Going the other direction, you can show that if $\boldsymbol{x}\succ\boldsymbol{y}$ there always exists a sequence of Robin Hood transfers to get from $\boldsymbol{x}$ to $\boldsymbol{y}$.
 
 <div class="takeaway-box" markdown="1">
-<div class="takeaway-title"><span>Schur Convexity</span> A function
-\(f:\mathbb{R}^K\rightarrow\mathbb{R}\) is <strong>Schur convex</strong>
-if</div>
+<div class="takeaway-title">Schur Convexity</div>
+
+A function $f:\mathbb{R}^K\rightarrow\mathbb{R}$ is **Schur convex** if
 
 <div class="equation-box">
 $$
@@ -1135,7 +1133,7 @@ $$
 As a sequence of Robin Hood transfers from $\boldsymbol{x}$ to $\boldsymbol{y}$ implies $\boldsymbol{x}\succ\boldsymbol{y}$ and vice versa, the above (strict) definition is equivalent to our Property 3. In this blogpost, we chose to start with Robin Hood transfers conceptually as they more intuitively connect with confidence score behaviour compared to the formal definitions of majorisation and Schur convexity. In the remainder of the blog we will refer to Property 3 as Schur convexity; however, we want to emphasise the underlying *intuition* -- Robin Hood transfers that increase inequality also decrease confidence/increase uncertainty. In fact, the standard criterion for Schur convexity tests precisely this (infinitessimally):
 
 <div class="takeaway-box" markdown="1">
-<div class="takeaway-title"><span>Schur–Ostrowski Criterion</span></div>
+<div class="takeaway-title">Schur–Ostrowski Criterion</div>
 
 <div class="equation-box">
 $$
