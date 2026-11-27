@@ -19,12 +19,12 @@ toc:
   - name: "Schur-Convexity Gives Us These Properties"
     subsections:
       - name: "Schur-Convexity, Formally"
-      - name: "Wait, They Were Schur-Convex All Along?"
+  - name: "Wait, They Were Schur-Convex All Along?"
   - name: "We Still Need Empirical Comparison"
   - name: "Additional Thoughts"
     subsections:
-      - name: "Not All Confidence Scores Are Schur Convex"
       - name: "Sequences of Probabilities"
+      - name: "Not All Confidence Scores Are Schur Convex"
   - name: "Concluding Remarks"
 ---
 When discussing uncertainty estimation in deep learning, often, the first scenario that comes to mind is of the following shape:
@@ -65,6 +65,8 @@ g(\boldsymbol \pi;\tau) = \begin{cases}
 $$
 </div>
 
+Notably, since the threshold can be freely set, strictly monotonic transforms of $C(\boldsymbol{\pi})$ give equivalent performance.
+
 {% include figure.liquid path="assets/img/2027-04-30-anonymous-blogpost/selective_prediction_pipeline.png" class="img-fluid" %}
 <div class="caption">Softmax-based confidence scores and selective prediction: \(C\) is a function that maps a categorical softmax distribution \(\boldsymbol \pi\) to a scalar measure of confidence. Higher-confidence predictions are selected according to a decision threshold.</div>
 
@@ -85,7 +87,7 @@ The AI research literature tends to take certain properties of softmax-based con
 
 ## What *Fundamental* Properties Should a Confidence Score Have?
 
-If you were to ask a deep learning researcher or practitioner what fundamental properties a softmax confidence score $C(\boldsymbol \pi)$ should have, they would probably say the following two things straight off the bat:
+If you were to ask a deep learning researcher or practitioner what fundamental properties a softmax confidence score $C(\boldsymbol \pi)$ should have, they would probably say the following two things straight off the bat:<d-footnote>Note that in this section we will keep definitions informal to keep things intuitive for all readers.</d-footnote>
 
 <style>
   .confidence-extrema-card-container {
@@ -1052,7 +1054,7 @@ $$
 </div>
 <div class="caption">Widget that visualises a sequence of Robin Hood transfers where confidence keeps decreasing.</div>
 
-The neat thing, is that given the above, the maximum and minimum end points drop out intuitively.
+The neat thing, is that given the above, the maximum and minimum end-points drop out intuitively. You cannot Robin hood transfer past a uniform distribution and likewise cannot reverse Robin Hood transfer past a one-hot distribution, whilst all other distributions are reachable in between these two.
 
 <div class="l-page">
   <iframe
@@ -1066,9 +1068,16 @@ The neat thing, is that given the above, the maximum and minimum end points drop
 
 Thus, Property 3 induces Properties 1 and 2.
 
+<div class="takeaway-box" markdown="1">
+<div class="takeaway-title">Key Takeaway</div>
+
+It is intuitively desirable for a confidence score $C(\boldsymbol{\pi})$ to *decrease* after a Robin Hood transfer (Property 3), *i.e.* increasing equality between two classes increases uncertainty. If this is the case, it will also decrease after a sequence of such transfers. This means that $C$ is *maximised* for one-hot distributions and minimised for uniform distributions (Properties 1 and 2).
+
+</div>
+
 ### Schur-Convexity, Formally
 
-The above behaviour, which we've tried to introduce intuitively, can be framed formally as Majorisation and Schur convexity <d-cite key="hardy1929simple,marshall2011inequalities"></d-cite>:
+The above behaviour, which we've tried to introduce intuitively, can be framed formally as Majorisation and Schur convexity <d-cite key="hardy1929simple,marshall2011inequalities"></d-cite>:<d-footnote>We note that the mathematical theory is well established, and if the reader wishes to understand it in more detail they should consult the referenced resources. This blog aims to present ideas to a broader audience, so we will refrain from dwelling too long on theory.</d-footnote>
 
 <div class="takeaway-box" markdown="1">
 <div class="takeaway-title">Majorisation</div>
@@ -1130,10 +1139,12 @@ $$
 
 </div>
 
-As a sequence of Robin Hood transfers from $\boldsymbol{x}$ to $\boldsymbol{y}$ implies $\boldsymbol{x}\succ\boldsymbol{y}$ and vice versa, the above (strict) definition is equivalent to our Property 3. In this blogpost, we chose to start with Robin Hood transfers conceptually as they more intuitively connect with confidence score behaviour compared to the formal definitions of majorisation and Schur convexity. In the remainder of the blog we will refer to Property 3 as Schur convexity; however, we want to emphasise the underlying *intuition* -- Robin Hood transfers that increase inequality also decrease confidence/increase uncertainty. In fact, the standard criterion for Schur convexity tests precisely this (infinitessimally):
+As a sequence of Robin Hood transfers from $\boldsymbol{x}$ to $\boldsymbol{y}$ implies $\boldsymbol{x}\succ\boldsymbol{y}$ and vice versa, the above (strict) definition is equivalent to our Property 3. In this blogpost, we chose to start with Robin Hood transfers conceptually as they more intuitively connect with confidence score behaviour compared to the formal definitions of majorisation and Schur convexity. In the remainder of the blog we will refer to Property 3 as Schur convexity; however, we want to emphasise the underlying *intuition* -- Robin Hood transfers that increase inequality also decrease confidence/increase uncertainty. In fact, the standard criterion for Schur convexity tests precisely this (infinitesimally):
 
 <div class="takeaway-box" markdown="1">
 <div class="takeaway-title">Schur–Ostrowski Criterion</div>
+
+$f$ is Schur convex if,
 
 <div class="equation-box">
 $$
@@ -1147,18 +1158,67 @@ $$
     \quad
     \text{for all } i,j
     \text{, and all } \boldsymbol{x}\in \mathbb{R}^K
-    \text{ where } \sum_{k} x_k=\text{constant}.
+    \text{ where } \sum_{k} x_k=\text{constant},
 \tag{8}
 $$
 </div>
 
+*i.e.* an infinitesimal transfer of mass from $j\rightarrow i$ induces a change in $f$ that is positive if $x_i>x_j$ and negative if $x_i<x_j$ (or zero).
+
 </div>
 
-### Wait, They Were Schur-Convex All Along?
+Finally, we note the difference between strict and non-strict Schur convexity. We have illustrated our intuitions with the strict version, *i.e.* a (sequence of) Robin Hood transfer(s) always reduces confidence, whilst non-strict Schur convexity permits confidence to stay constant. An example of a non-strict Schur convex score would be the maximum of the softmax $C=\max_k \pi_k$, where transfers between non-max outcomes do not change the score. On consequence of this is the *uniqueness* of Properties 1 and 2 <d-cite key="marshall2011inequalities"></d-cite>:
 
-Next, we'll discuss how many existing confidence scores used in the literature are in fact Schur convex, and so have the desirable properties discussed in this blogpost.
+| Property | strictly Schur-convex | Schur-convex |
+|:---|:---|:---|
+| 3: (sequence of) Robin Hood transfer(s) | decreases score | Cannot increase score |
+| 1: one-hot distribution(s) | *unique* global maximiser(s) | global maximiser(s), unique or non-unique |
+| 2: uniform distribution | *unique* global minimiser | global minimiser, unique or non-unique |
+
+## Wait, They Were Schur-Convex All Along?
+
+{% include figure.liquid path="assets/img/2027-04-30-anonymous-blogpost/schur-convexity-meme-compressed.jpg" class="img-fluid" %}
+<div class="caption">A meme</div>
+
+Next, we'll discuss how many existing confidence scores used in the literature are in fact Schur convex, and so have the desirable properties discussed in this blogpost. The following table lists a number of examples.
+
+| Name | $C(\boldsymbol{\pi})$ | Schur-convexity |
+|:---|:--:|:--:|
+| Maximum Softmax Probability (MSP) <d-cite key="Hendrycks2017Baseline,Chow1970Optimum"></d-cite> | $\displaystyle \max_k \pi_k$ | Non-strict |
+| Negative Gini <d-cite key="Gini1912Variabilita,Cattelan2024How"></d-cite>,<d-footnote>Interestingly, this score dates back to the same work that laid the foundations for the Gini coefficient, which is widely used to quantify income inequality. – a more direct link to our Robin Hood analogy. In fact, there exists an economics analogue to Schur convexity, the Pigou–Dalton transfer principle, which says that a measure of inequality should decrease if wealth is transferred from a richer individual to a poorer one.</d-footnote> DOCTOR <d-cite key="Granese2021Doctor"></d-cite> | $\displaystyle \sum_k \pi_k^2 - 1$ | Strict |
+| Negative Shannon Entropy <d-cite key="Shannon1948Mathematical,Malinin2021Uncertainty"></d-cite> | $\displaystyle \sum_k \pi_k \log \pi_k$ | Strict |
+| Negative Rényi Entropy <d-cite key="Darrin2023Rainproof,Gomes2024Datadriven"></d-cite> | $\displaystyle \frac{1}{\alpha-1}
+    \log \sum_k \pi_k^\alpha$ | Strict |
+| Self-Certainty <d-cite key="Kang2025Scalable"></d-cite> | $\displaystyle -\frac{1}{K}\sum_k \log(K\pi_k)$ | Strict |
+| Negative Generalised Entropy (GEN) <d-cite key="Liu2023Gen"></d-cite> | $\displaystyle -\sum_k [\pi_k(1-\pi_k)]^\gamma$ | Strict |
+| GradNorm (softmax component) <d-cite key="Huang2021Importance"></d-cite> | $\displaystyle \sum_k \left|\pi_k-\frac{1}{K}\right|$ | Non-strict |
+
+What's interesting is that not a single paper explicitly discusses Schur convexity. It seems like Schur-convexity has been organically selected for by researchers, without them necessarily understanding that it *fundamentally* determines some important properties of the scores that they propose.
+
+Many confidence scores inherit Schur convexity via the following result: any (monotone transform of a) permutation-invariant convex function is Schur-convex <d-cite key="marshall2011inequalities"></d-cite>. A straightforward example is a confidence score of the form,
+
+<div class="equation-box">
+$$
+C(\boldsymbol{\pi})=g\left(\sum_k f(\pi_k) \right)
+\tag{9}\label{eq:convex-sum}
+$$
+</div>
+
+where $f$ is convex and $g$ is non-decreasing monotone -- you can see that all the listed scores in the above table follow this form.
+
+The established theoretical and practical frameworks that researchers derive confidence scores from often contain the properties of permutation invariance and convexity, naturally giving rise to Schur convexity. Classes/outcomes are often treated symmetrically as a practical default giving scores permutation invariance -- this means scores don't require class-specific knowledge, improving portability across tasks and ease of deployment. Convexity arises in Bayesian decision theory <d-cite key="Chow1970Optimum"></d-cite> and Proper Scoring Rules <d-cite key="Dawid2014Theory,Kotelevskii2025From"></d-cite><d-footnote>Both MSP <d-cite key="Chow1970Optimum"></d-cite> and the negative generalised entropies associated with proper scoring rules <d-cite key="Dawid2014Theory"></d-cite> arise from maximising an expected utility under distribution \(\boldsymbol{\pi}\). Since the expected utility of a given decision is a linear function of the outcome probabilities, its maximum over all possible decisions is convex in \(\boldsymbol{\pi}\).</d-footnote> through which many of the above scores can be characterised.<d-footnote>We won’t dwell on proper scoring rules here, however, it may interest the reader that many confidence scores in the literature can be cast as negative generalised entropies within this theoretical framework <d-cite key="Dawid2014Theory"></d-cite>.</d-footnote> Most familiar entropies from information theory, where researchers often lift scores from, are of the form in Equation \ref{eq:convex-sum} <d-cite key="Salicru1993Asymptotic,Americo2022Channel"></d-cite>.
+
+Researchers also like to explicitly construct scores as divergences from the uniform distribution (*e.g.* Gradnorm <d-cite key="Huang2021Importance"></d-cite>, GEN <d-cite key="Liu2023Gen"></d-cite> and Self-Certainty <d-cite key="Kang2025Scalable"></d-cite>), seeking to minimise confidence at the uniform and maximise it at one-hot distributions (Properties 1 and 2). Interestingly, the three listed examples all end up satisfying the notion of Schur convexity as well.
 
 ## We Still Need Empirical Comparison
+
+Although Schur convexity gives a confidence score a number of desirable properties, it only constrains ranking behaviour between distributions that majorise each other -- for other confidence comparisons it is completely permissive. This is illustrated in the following widget, where we use a score parameterised by power $\alpha$ to demonstrate how ranking behaviour can vary whilst Schur convexity is maintained.<d-footnote>Incidentally, we remark that this power score is able to encompass the ranking behaviour of a large range of existing confidence scores, as indicated on the widget.</d-footnote> Cycling through the modes, note that as $\alpha$ varies:
+
+1.  The confidence quantile rankings of different $\boldsymbol{\pi}$ vary wildly.
+
+2.  The relative ranking of $\boldsymbol{\pi}$ that majorise each other stays fixed due to Schur convexity.
+
+3.  The relative ranking of $\boldsymbol{\pi}$ that do not majorise each other can change.
 
 <div class="l-page">
   <iframe
@@ -1168,12 +1228,57 @@ Next, we'll discuss how many existing confidence scores used in the literature a
     style="width: 100%; height: 1200px; border: 0;"
   ></iframe>
 </div>
-<div class="caption">Widget that visualises the contours of a score over the simplex. Shows how behaviour can vary considerably even with schur convexity.</div>
+<div class="caption">Widget that visualises the contours of a score over the simplex. Shows how behaviour can vary considerably even with Schur convexity.</div>
+
+Thus, for developing effective confidence scores for selective prediction, Schur convexity is not sufficient. We still need experimental evaluation to determine the best ranking behaviour for a given task with a given distribution over softmax outputs $\boldsymbol{\pi}$.
+
+<div class="takeaway-box" markdown="1">
+<div class="takeaway-title">Key Takeaway</div>
+
+Although Schur convexity gives a confidence score desirable properties, it is not sufficient to determine ranking performance. For that, we still need empirical evaluations on task-specific distributions over softmax outputs.
+
+</div>
 
 ## Additional Thoughts
 
+### Sequences of Probabilities
+
+In the age of large language models, uncertainty scores over *sequences* of softmax outputs are becoming increasingly pertinent. It turns out we can also define a sequence-wise notion of Schur convexity, based on row-wise majorisation <d-cite key="marshall2011inequalities"></d-cite>:
+
+<div class="takeaway-box" markdown="1">
+<div class="takeaway-title">Sequence Schur Convexity</div>
+
+For two sequences of probability vectors of length $T$, $\boldsymbol{\Pi}=(\boldsymbol{\pi}^{(1)},\ldots,\boldsymbol{\pi}^{(T)})$ and $\boldsymbol{Q}=(\boldsymbol{q}^{(1)},\ldots,\boldsymbol{q}^{(T)})$, a sequence confidence score $C_{\mathrm{seq}}$ is **sequence Schur convex** if
+
+<div class="equation-box">
+$$
+C_{\mathrm{seq}}(\mathcal{P}) \geq C_{\mathrm{seq}}(\mathcal{Q})
+        \text{ when }
+        \boldsymbol{\pi}^{(t)} \succ \boldsymbol{q}^{(t)}
+        \text{ for all } t=1,\dots,T,
+\tag{10}
+$$
+</div>
+
+*i.e.* $\boldsymbol{\Pi}$ majorises $\boldsymbol{Q}$ comparing vectors at each sequence position. Intuitively, a (sequence of) Robin Hood transfer(s) at any position in the sequence should reduce confidence.
+
+</div>
+
+One can straightforwardly construct a sequence Schur convex score by aggregating a position-wise score over sequence,
+
+<div class="equation-box">
+$$
+C_{\mathrm{seq}}(\mathcal{P}) =
+    A\left(C(\boldsymbol{\pi}^{(1)}),\ldots,
+    C(\boldsymbol{\pi}^{(T)})\right),
+\tag{11}
+$$
+</div>
+
+as long as the aggregation function $A$ is monotonically non-decreasing in each of its arguments, *e.g.* sum, mean, max, product (if $C\geq 0$). Indeed many existing sequence confidence scores achieve sequence Schur convexity by doing this such as negative mean token entropy <d-cite key="Vashurin2025Benchmarking"></d-cite>, mean Rényi entropy <d-cite key="Darrin2023Rainproof"></d-cite>, and self-certainty <d-cite key="Kang2025Scalable"></d-cite> (without mentioning Schur convexity).
+
 ### Not All Confidence Scores Are Schur Convex
 
-### Sequences of Probabilities
+Confidence score designers are free to forgo Schur convexity as a property, *i.e.* Robin Hood transfers mustn't increase confidence, and there are some examples of this in the literature. Generative perplexity <d-cite key="Vashurin2025Benchmarking"></d-cite> evaluates on the generated tokens, so a Robin Hood transfer into a generated token's probability can increase confidence even if the softmax becomes more equal. The margin between the top 2 probabilities in $\boldsymbol{\pi}$ <d-cite key="Cattelan2024How"></d-cite>, keeps the maximum and minimum at one hot and uniform, however, a Robin Hood transfer out of the 2nd largest probability will increase confidence. Scores that treat specific classes/outcomes differently <d-cite key="Gomes2024Datadriven"></d-cite> are inherently not permutation invariant, and so are not Schur convex. Ultimately, ranking performance is the downstream goal -- Schur convexity provides *desirable* properties, but they are not *essential* or necessarily *optimal*.
 
 ## Concluding Remarks
